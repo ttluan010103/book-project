@@ -3,6 +3,7 @@ const { Created, OK } = require('../core/success.response');
 
 const cartModel = require('../models/cart.model');
 const productModel = require('../models/product.model');
+const couponModel = require('../models/coupon.model');
 
 async function calculateTotalPrice(findCartUser) {
     const allProductIds = findCartUser.products.map((p) => p.productId);
@@ -173,20 +174,30 @@ class CartController {
 
         const findCartUser = await cartModel.findOne({ userId: id });
 
+        const today = new Date();
+
+        const coupons = await couponModel.find({
+            startDate: { $lte: today },
+            endDate: { $gte: today },
+            minPrice: { $lte: findCartUser.totalPrice },
+            quantity: { $gt: 0 },
+        });
+
         if (!findCartUser) {
             const newCart = await cartModel.create({
                 userId: id,
                 products: [],
+                coupons: coupons,
             });
             return new OK({
                 message: 'Lấy giỏ hàng thành công',
-                metadata: newCart,
+                metadata: { cart: newCart, coupons },
             }).send(res);
         }
 
         return new OK({
             message: 'Lấy giỏ hàng thành công',
-            metadata: findCartUser,
+            metadata: { cart: findCartUser, coupons },
         }).send(res);
     }
 
@@ -211,6 +222,47 @@ class CartController {
 
         return new OK({
             message: 'Cập nhật thông tin giỏ hàng thành công',
+            metadata: findCartUser,
+        }).send(res);
+    }
+
+    async applyCoupon(req, res) {
+        const id = req.user;
+        const { couponId } = req.body;
+        if (!id || !couponId) {
+            throw new BadRequestError('Thiếu thông tin giỏ hàng');
+        }
+
+        const findCartUser = await cartModel.findOne({ userId: id });
+        if (!findCartUser) {
+            throw new NotFoundError('Giỏ hàng không tồn tại');
+        }
+
+        const findCoupon = await couponModel.findById(couponId);
+
+        if (!findCoupon) {
+            throw new NotFoundError('Mã giảm giá không tồn tại');
+        }
+
+        switch (true) {
+            case findCoupon.quantity <= 0:
+                throw new BadRequestError('Mã giảm giá đã hết số lượng');
+            case findCoupon.startDate > new Date():
+                throw new BadRequestError('Mã giảm giá chưa bắt đầu');
+            case findCoupon.endDate < new Date():
+                throw new BadRequestError('Mã giảm giá đã hết hạn');
+            case findCartUser.totalPrice < findCoupon.minPrice:
+                throw new BadRequestError('Đơn hàng không đủ điều kiện áp dụng mã giảm giá');
+            default:
+                break;
+        }
+
+        findCartUser.couponId = findCoupon._id;
+        findCartUser.finalPrice = findCartUser.totalPrice - (findCartUser.totalPrice * findCoupon.discount) / 100;
+        await findCartUser.save();
+
+        return new OK({
+            message: 'Áp dụng mã giảm giá thành công',
             metadata: findCartUser,
         }).send(res);
     }

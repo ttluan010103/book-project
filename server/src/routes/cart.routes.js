@@ -11,5 +11,6 @@ router.put('/update', authUser, asyncHandler(cartController.updateCart));
 router.delete('/delete/:productId', authUser, asyncHandler(cartController.deleteProductInCart));
 router.get('/get', authUser, asyncHandler(cartController.getCartInUser));
 router.put('/update-info', authUser, asyncHandler(cartController.updateInfoCart));
+router.put('/apply-coupon', authUser, asyncHandler(cartController.applyCoupon));
 
 module.exports = router;

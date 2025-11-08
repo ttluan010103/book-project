@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
-const cartModel = new Schema(
+const paymentModel = new Schema(
     {
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         products: [
@@ -18,10 +18,12 @@ const cartModel = new Schema(
         email: { type: String, require: true },
         finalPrice: { type: Number, default: 0 }, // 90.000đ
         couponId: { type: mongoose.Schema.Types.ObjectId, ref: 'coupon' },
+        status: { type: String, default: 'pending' },
+        paymentMethod: { type: String, enum: ['cod', 'momo', 'vnpay'], require: true },
     },
     {
         timestamps: true,
     },
 );
 
-module.exports = mongoose.model('cart', cartModel);
+module.exports = mongoose.model('payment', paymentModel);
