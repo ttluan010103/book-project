@@ -18,7 +18,11 @@ const paymentModel = new Schema(
         email: { type: String, require: true },
         finalPrice: { type: Number, default: 0 }, // 90.000đ
         couponId: { type: mongoose.Schema.Types.ObjectId, ref: 'coupon' },
-        status: { type: String, default: 'pending' },
+        status: {
+            type: String,
+            enum: ['pending', 'confirmed', 'delivered', 'completed', 'cancelled'],
+            default: 'pending',
+        },
         paymentMethod: { type: String, enum: ['cod', 'momo', 'vnpay'], require: true },
     },
     {

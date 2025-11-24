@@ -5,7 +5,7 @@ const userModel = require('../models/user.model');
 const otpModel = require('../models/otp.model');
 const jwt = require('jsonwebtoken');
 
-const { createAccessToken, createRefreshToken } = require('../auth/checkAuth');
+const { createAccessToken, createRefreshToken, verifyToken } = require('../auth/checkAuth');
 const SendMailForgotPassword = require('../utils/mailForgotPassword');
 
 const bcrypt = require('bcrypt');
@@ -182,6 +182,30 @@ class UsersController {
 
         return new OK({
             message: 'Khôi phục mật khẩu thành công',
+            metadata: true,
+        }).send(res);
+    }
+
+    async refreshToken(req, res) {
+        const refreshToken = req.cookies.refreshToken;
+
+        if (!refreshToken) {
+            throw new AuthFailureError('Vui lòng đăng nhập lại');
+        }
+        const decoded = await verifyToken(refreshToken);
+        if (!decoded) {
+            throw new AuthFailureError('Vui lòng đăng nhập lại');
+        }
+        const accessToken = createAccessToken({ id: decoded.id });
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,
+            secure: true,
+            maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day
+            sameSite: 'strict',
+        });
+
+        return new OK({
+            message: 'Refresh token thành công',
             metadata: true,
         }).send(res);
     }

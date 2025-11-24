@@ -5,6 +5,7 @@ const { NotFoundError, BadRequestError } = require('../core/error.response');
 const getPublicId = require('../utils/getPublicId');
 
 const productModel = require('../models/product.model');
+const feedbackModel = require('../models/feedback.model');
 
 class ProductController {
     async createProduct(req, res) {
@@ -148,13 +149,14 @@ class ProductController {
     async getProductById(req, res) {
         const { id } = req.params;
         const product = await productModel.findById(id);
+        const feedbacks = await feedbackModel.find({ productId: id });
         if (!product) {
             throw new NotFoundError('Sản phẩm không tồn tại');
         }
 
         return new OK({
             message: 'Lấy thông tin sản phẩm thành công',
-            metadata: product,
+            metadata: { product, feedbacks },
         }).send(res);
     }
 
@@ -178,6 +180,22 @@ class ProductController {
         return new OK({
             message: 'Xóa sản phẩm thành công',
             metadata: findProduct,
+        }).send(res);
+    }
+
+    async getProductByCategory(req, res) {
+        const { idCategory } = req.params;
+
+        let product = [];
+        if (idCategory) {
+            product = await productModel.find({ categoryProduct: idCategory });
+        } else {
+            product = await productModel.find();
+        }
+
+        return new OK({
+            message: 'Lấy sản phẩm theo danh mục thành công',
+            metadata: product,
         }).send(res);
     }
 }

@@ -10,4 +10,7 @@ router.post('/create', authUser, asyncHandler(paymentController.createPayment));
 router.get('/vnpay-callback', asyncHandler(paymentController.vnpayCallback));
 router.get('/momo-callback', asyncHandler(paymentController.momoCallback));
 
+router.get('/admin/list', authAdmin, asyncHandler(paymentController.getPaymentsAdmin));
+router.put('/admin/update/:orderId', authAdmin, asyncHandler(paymentController.updatePayment));
+
 module.exports = router;

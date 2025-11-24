@@ -26,4 +26,6 @@ router.put('/update/:id', authAdmin, upload.array('imagesProduct', 100), asyncHa
 router.get('/detail/:id', asyncHandler(productController.getProductById));
 router.delete('/delete/:id', authAdmin, asyncHandler(productController.deleteProduct));
 
+router.get('/list/:idCategory', asyncHandler(productController.getProductByCategory));
+
 module.exports = router;

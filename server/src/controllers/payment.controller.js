@@ -256,6 +256,38 @@ class PaymentController {
             metadata: newPayment,
         }).send(res);
     }
+
+    async getPaymentsAdmin(req, res) {
+        const dataPayment = await paymentModel
+            .find({})
+            .populate('userId', 'fullName email')
+            .populate('products.productId', '')
+            .populate('couponId');
+        return new OK({
+            message: 'Lấy danh sách đơn hàng thành công',
+            metadata: dataPayment,
+        }).send(res);
+    }
+
+    async updatePayment(req, res) {
+        const { orderId } = req.params;
+        const { status } = req.body;
+        if (!orderId || !status) {
+            throw new BadRequestError('Bạn đang thiếu thông tin');
+        }
+
+        const findPayment = await paymentModel.findById(orderId);
+        if (!findPayment) {
+            throw new NotFoundError('Đơn hàng không tồn tại');
+        }
+
+        findPayment.status = status;
+        await findPayment.save();
+        return new OK({
+            message: 'Cập nhật đơn hàng thành công',
+            metadata: findPayment,
+        }).send(res);
+    }
 }
 
 module.exports = new PaymentController();
