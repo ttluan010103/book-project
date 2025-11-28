@@ -27,3 +27,8 @@ export const requestApplyCounpon = async (data) => {
     const res = await apiClient.put(`${apiCart}/apply-coupon`, data);
     return res.data;
 };
+
+export const requestUpdateInfoCart = async (data) => {
+    const res = await apiClient.put(`${apiCart}/update-info`, data);
+    return res.data;
+};

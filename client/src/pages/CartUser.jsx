@@ -4,7 +4,7 @@ import { useStore } from '../hooks/useStore';
 import { Trash2, Plus, Minus, Tag } from 'lucide-react';
 import { requestApplyCounpon, requestDeleteProductCart, requestUpdateQuantity } from '../config/CartRequest';
 import { message } from 'antd';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function CartUser() {
     const { cart, getCart } = useStore();
@@ -87,6 +87,13 @@ function CartUser() {
 
     const closeDeleteModal = () => {
         setDeleteModal({ show: false, product: null });
+    };
+
+    const navigate = useNavigate();
+
+    const handleCheckout = async () => {
+        await getCart();
+        navigate('/checkout');
     };
 
     const applyCoupon = async (coupon) => {
@@ -281,9 +288,14 @@ function CartUser() {
                                 </div>
                             </div>
 
-                            <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-blue-700 transition mt-6">
-                                Tiến Hành Thanh Toán
-                            </button>
+                            <Link to="/checkout">
+                                <button
+                                    onClick={handleCheckout}
+                                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-blue-700 transition mt-6"
+                                >
+                                    Tiến Hành Thanh Toán
+                                </button>
+                            </Link>
                             <Link to="/">
                                 <button className="w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold mt-3 hover:bg-gray-50 transition">
                                     Tiếp Tục Mua Sắm
