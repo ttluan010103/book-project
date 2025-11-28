@@ -12,30 +12,32 @@ import {
     PlusOutlined,
 } from '@ant-design/icons';
 import { useStore } from '../hooks/useStore';
+import { requestAddToCart } from '../config/CartRequest';
 
 function DetailProduct() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
 
-    const { dataUser } = useStore();
+    const { dataUser, getCart } = useStore();
+
+    const fetchProductDetail = async () => {
+        // setLoading(true);
+        try {
+            const res = await productDetail(id);
+            setProduct(res.metadata.product);
+        } catch (error) {
+            console.error('Error fetching product:', error);
+            message.error('Không thể tải thông tin sản phẩm');
+        } finally {
+            // setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchProductDetail = async () => {
-            setLoading(true);
-            try {
-                const res = await productDetail(id);
-                setProduct(res.metadata.product);
-            } catch (error) {
-                console.error('Error fetching product:', error);
-                message.error('Không thể tải thông tin sản phẩm');
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchProductDetail();
     }, [id]);
 
@@ -75,8 +77,19 @@ function DetailProduct() {
         }).format(price);
     };
 
-    const handleAddToCart = () => {
-        message.success(`Đã thêm ${quantity} sản phẩm vào giỏ hàng`);
+    const handleAddToCart = async () => {
+        try {
+            const data = {
+                productId: id,
+                quantity,
+            };
+            const res = await requestAddToCart(data);
+            await fetchProductDetail();
+            await getCart();
+            message.success(res.message);
+        } catch (error) {
+            message.error(error.response.data.message);
+        }
     };
 
     const handleBuyNow = () => {

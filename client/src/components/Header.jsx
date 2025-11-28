@@ -1,13 +1,13 @@
 import logo from '../assets/images/logo.webp';
-import { Button, Input, Avatar, Dropdown, message } from 'antd';
-import { SearchOutlined, UserOutlined, DownOutlined } from '@ant-design/icons';
+import { Button, Input, Avatar, Dropdown, message, Badge } from 'antd';
+import { SearchOutlined, UserOutlined, DownOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 
 import { useStore } from '../hooks/useStore';
 import { Link, useNavigate } from 'react-router-dom';
 import { requestLogout } from '../config/UserRequest';
 
 function Header() {
-    const { dataUser } = useStore();
+    const { dataUser, cart } = useStore();
 
     const navigate = useNavigate();
 
@@ -59,14 +59,19 @@ function Header() {
 
                     {/* Actions */}
                     <div className="flex items-center gap-3">
-                        {/* <Badge count={3} size="small">
-                            <Button
-                                type="text"
-                                icon={<ShoppingCartOutlined style={{ fontSize: '20px' }} />}
-                                size="large"
-                                className="hover:bg-gray-100"
-                            />
-                        </Badge> */}
+                        <Link to={'/cart'}>
+                            <Badge count={cart?.cart?.products?.length} size="small">
+                                <Button
+                                    type="text"
+                                    icon={<ShoppingCartOutlined style={{ fontSize: '20px' }} />}
+                                    size="large"
+                                    className="hover:bg-gray-100"
+                                >
+                                    Giỏ hàng
+                                </Button>
+                            </Badge>
+                        </Link>
+
                         {dataUser && dataUser._id ? (
                             <Dropdown
                                 menu={{ items: userMenuItems }}

@@ -1,10 +1,14 @@
-import { Card, Tag, Button, Image } from 'antd';
+import { Card, Tag, Button, Image, message } from 'antd';
 import { ShoppingCartOutlined, EyeOutlined, HeartOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useStore } from '../hooks/useStore';
+import { requestAddToCart } from '../config/CartRequest';
 
 function CardBody({ dataItem }) {
     const [imageError, setImageError] = useState(false);
+
+    const { getCart } = useStore();
 
     // Calculate discounted price
     const discountedPrice = dataItem.priceProduct - (dataItem.priceProduct * dataItem.discountProduct) / 100;
@@ -15,6 +19,20 @@ function CardBody({ dataItem }) {
             style: 'currency',
             currency: 'VND',
         }).format(price);
+    };
+
+    const handleAddToCart = async () => {
+        try {
+            const data = {
+                productId: dataItem._id,
+                quantity: 1,
+            };
+            const res = await requestAddToCart(data);
+            await getCart();
+            message.success(res.message);
+        } catch (error) {
+            message.error(error.response.data.message);
+        }
     };
 
     return (
@@ -113,6 +131,7 @@ function CardBody({ dataItem }) {
                 <Button
                     type="primary"
                     size="large"
+                    onClick={handleAddToCart}
                     icon={<ShoppingCartOutlined />}
                     className="w-full rounded-lg font-semibold"
                     disabled={dataItem.stockProduct === 0}

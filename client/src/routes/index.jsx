@@ -1,4 +1,5 @@
 import App from '../App';
+import CartUser from '../pages/CartUser';
 import DetailProduct from '../pages/DetailProduct';
 import LoginUser from '../pages/LoginUser';
 import RegisterUser from '../pages/RegisterUser';
@@ -19,6 +20,10 @@ const routes = [
     {
         path: '/register',
         component: <RegisterUser />,
+    },
+    {
+        path: '/cart',
+        component: <CartUser />,
     },
 ];
 

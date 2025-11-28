@@ -172,7 +172,7 @@ class CartController {
     async getCartInUser(req, res) {
         const id = req.user;
 
-        const findCartUser = await cartModel.findOne({ userId: id });
+        const findCartUser = await cartModel.findOne({ userId: id }).populate('products.productId');
 
         const today = new Date();
 
